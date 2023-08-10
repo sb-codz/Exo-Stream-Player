@@ -3,18 +3,30 @@ package com.venomdino.exonetworkstreamer.activities;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.content.res.Resources;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.provider.Settings;
+import android.view.GestureDetector;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GestureDetectorCompat;
 import androidx.media3.common.C;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.MimeTypes;
@@ -42,11 +54,13 @@ import androidx.media3.exoplayer.trackselection.AdaptiveTrackSelection;
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector;
 import androidx.media3.exoplayer.trackselection.ExoTrackSelection;
 import androidx.media3.exoplayer.trackselection.MappingTrackSelector;
+import androidx.media3.ui.AspectRatioFrameLayout;
 import androidx.media3.ui.PlayerView;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.venomdino.exonetworkstreamer.R;
 import com.venomdino.exonetworkstreamer.helpers.CustomMethods;
+import com.venomdino.exonetworkstreamer.helpers.DoubleClickListener;
 
 import java.net.CookieHandler;
 import java.net.CookieManager;
@@ -64,8 +78,20 @@ public class PlayerActivity extends AppCompatActivity {
     ExoPlayer exoPlayer;
     DefaultTrackSelector defaultTrackSelector;
     ArrayList<String> videoQualities;
-    TextView fileNameTV;
-    ImageButton qualitySelectionBtn;
+    TextView fileNameTV, brightVolumeTV;
+    LinearLayout brightnessVolumeContainer;
+    ImageView volumeIcon, brightnessIcon;
+    ImageButton screenRotateBtn, qualitySelectionBtn, backButton, fitScreenBtn, backward10, forward10;
+    Button doubleTapSkipBackwardIcon, doubleTapSkipForwardIcon;
+    private int touchPositionX;
+    GestureDetectorCompat gestureDetectorCompat;
+    private int brightness = 0;
+    private int volume = 0;
+    private AudioManager audioManager;
+    private final int SHOW_MAX_BRIGHTNESS = 100;
+    private final int SHOW_MAX_VOLUME = 50;
+    boolean shouldShowController = true;
+    private boolean isPortrait = true;
     int selectedQualityIndex = 0;
     UUID drmScheme;
     private boolean playWhenReady = true;
@@ -78,6 +104,7 @@ public class PlayerActivity extends AppCompatActivity {
         DEFAULT_COOKIE_MANAGER.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -132,6 +159,191 @@ public class PlayerActivity extends AppCompatActivity {
         initVars();
 
         initializePlayer();
+
+//        ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        /* This block of codes set the current device volume and brightness to the video on startup */
+        brightness = (int) (getCurrentScreenBrightness() * 100);
+        setVolumeVariable();
+
+//        ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        screenRotateBtn.setOnClickListener(view -> {
+            if (isPortrait) {
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                isPortrait = false;
+            } else {
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+                isPortrait = true;
+            }
+        });
+//        ..........................................................................................
+        qualitySelectionBtn.setOnClickListener(view -> {
+
+            if (videoQualities != null) {
+
+                if (videoQualities.size() > 0) {
+                    getQualityChooserDialog(this, videoQualities);
+                } else {
+                    Toast.makeText(this, "No video quality found.", Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                Toast.makeText(this, "Wait until video start.", Toast.LENGTH_SHORT).show();
+            }
+        });
+//        ..........................................................................................
+        fitScreenBtn.setOnClickListener(v -> {
+
+            if (playerView.getResizeMode() == AspectRatioFrameLayout.RESIZE_MODE_FIT){
+                playerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_ZOOM);
+                fitScreenBtn.setImageResource(R.drawable.crop_5_4);
+                Toast.makeText(this, "ZOOM", Toast.LENGTH_SHORT).show();
+            }
+            else if (playerView.getResizeMode() == AspectRatioFrameLayout.RESIZE_MODE_ZOOM){
+                playerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FILL);
+                fitScreenBtn.setImageResource(R.drawable.fit_screen);
+                Toast.makeText(this, "FILL", Toast.LENGTH_SHORT).show();
+            }
+            else if (playerView.getResizeMode() == AspectRatioFrameLayout.RESIZE_MODE_FILL){
+                playerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FIT);
+                fitScreenBtn.setImageResource(R.drawable.crop_free);
+                Toast.makeText(this, "FIT", Toast.LENGTH_SHORT).show();
+            }
+        });
+//        ..........................................................................................
+        backButton.setOnClickListener(view -> {
+
+            if (exoPlayer != null){
+                exoPlayer.stop();
+                exoPlayer.release();
+            }
+            onBackPressed();
+        });
+//        ..........................................................................................
+        backward10.setOnClickListener(view -> exoPlayer.seekTo(exoPlayer.getCurrentPosition() - 10000));
+        forward10.setOnClickListener(view -> exoPlayer.seekTo(exoPlayer.getCurrentPosition() + 10000));
+//        ..........................................................................................
+        playerView.setOnTouchListener((view, motionEvent) -> {
+
+            gestureDetectorCompat.onTouchEvent(motionEvent);
+
+            if (motionEvent.getAction() == MotionEvent.ACTION_UP){
+                brightnessVolumeContainer.setVisibility(View.GONE);
+
+                if (!shouldShowController){
+
+                    playerView.setUseController(false);
+
+                    new Handler().postDelayed(()-> {
+                        shouldShowController = true;
+                        playerView.setUseController(true);
+                    }, 500);
+                }
+            }
+
+            if (motionEvent.getAction() == MotionEvent.ACTION_DOWN){
+                touchPositionX = (int) motionEvent.getX();
+            }
+            return false;
+        });
+//        ..........................................................................................
+        playerView.setOnClickListener(new DoubleClickListener(500, () -> {
+
+            playerView.setUseController(false);
+            new Handler().postDelayed(()-> playerView.setUseController(true),500);
+
+            int deviceWidth = Resources.getSystem().getDisplayMetrics().widthPixels;
+
+            if (touchPositionX < deviceWidth/2){
+                doubleTapSkipBackwardIcon.setVisibility(View.VISIBLE);
+                new Handler().postDelayed(()-> doubleTapSkipBackwardIcon.setVisibility(View.GONE),500);
+                exoPlayer.seekTo(exoPlayer.getCurrentPosition() - 10000);
+            }
+            else{
+                doubleTapSkipForwardIcon.setVisibility(View.VISIBLE);
+                new Handler().postDelayed(()-> doubleTapSkipForwardIcon.setVisibility(View.GONE),500);
+                exoPlayer.seekTo(exoPlayer.getCurrentPosition() + 10000);
+            }
+        }));
+//        ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                                         //Gesture Detect Section//
+//        ******************************************************************************************
+        gestureDetectorCompat = new GestureDetectorCompat(this, new GestureDetector.OnGestureListener() {
+            @Override
+            public boolean onDown(@NonNull MotionEvent motionEvent) {
+                return false;
+            }
+
+            @Override
+            public void onShowPress(@NonNull MotionEvent motionEvent) {
+
+            }
+
+            @Override
+            public boolean onSingleTapUp(@NonNull MotionEvent motionEvent) {
+                return false;
+            }
+
+            @Override
+            public void onLongPress(@NonNull MotionEvent motionEvent) {
+
+            }
+
+            @Override
+            public boolean onFling(@NonNull MotionEvent motionEvent, @NonNull MotionEvent motionEvent1, float v, float v1) {
+                return false;
+            }
+
+            @Override
+            public boolean onScroll(@NonNull MotionEvent motionEvent, @NonNull MotionEvent motionEvent1, float distanceX, float distanceY) {
+
+                int deviceWidth = Resources.getSystem().getDisplayMetrics().widthPixels;
+
+                if (Math.abs(distanceY) > Math.abs(distanceX)){
+
+                    brightnessVolumeContainer.setVisibility(View.VISIBLE);
+
+                    shouldShowController = false;
+
+                    if (motionEvent.getX() < deviceWidth/2){
+
+                        volumeIcon.setVisibility(View.GONE);
+                        brightnessIcon.setVisibility(View.VISIBLE);
+
+                        boolean increase = distanceY > 0;
+
+                        int newValue = (increase) ? brightness + 1 : brightness - 1;
+
+                        if (newValue >= 0 && newValue <= SHOW_MAX_BRIGHTNESS){
+                            brightness = newValue;
+                        }
+
+                        brightVolumeTV.setText(String.valueOf(brightness));
+                        setScreenBrightness(brightness);
+                    }
+                    else{
+
+                        if (audioManager != null){
+
+                            volumeIcon.setVisibility(View.VISIBLE);
+                            brightnessIcon.setVisibility(View.GONE);
+
+                            boolean increase = distanceY > 0;
+
+                            int newValue = (increase) ? volume + 1 : volume - 1;
+
+                            if (newValue >= 0 && newValue <= SHOW_MAX_VOLUME){
+                                volume = newValue;
+                            }
+
+                            brightVolumeTV.setText(String.valueOf(volume));
+                            setVolume(volume);
+                        }
+                    }
+                }
+                return true;
+            }
+        });
+
+//        ******************************************************************************************
     }
 
     //______________________________________________________________________________________________
@@ -160,8 +372,6 @@ public class PlayerActivity extends AppCompatActivity {
         //*********************************************************************************
 
         exoPlayer = new ExoPlayer.Builder(this, renderersFactory)
-                .setSeekForwardIncrementMs(10000)
-                .setSeekBackIncrementMs(10000)
                 .setTrackSelector(defaultTrackSelector)
                 .setLoadControl(loadControl)
                 .build();
@@ -221,22 +431,6 @@ public class PlayerActivity extends AppCompatActivity {
         playerView.setShowNextButton(false);
         playerView.setShowPreviousButton(false);
         playerView.setControllerShowTimeoutMs(2500);
-
-//        ..........................................................................................
-
-        qualitySelectionBtn.setOnClickListener(view -> {
-
-            if (videoQualities != null) {
-
-                if (videoQualities.size() > 0) {
-                    getQualityChooserDialog(this, videoQualities);
-                } else {
-                    Toast.makeText(this, "No video quality found.", Toast.LENGTH_SHORT).show();
-                }
-            } else {
-                Toast.makeText(this, "Wait until video start.", Toast.LENGTH_SHORT).show();
-            }
-        });
     }
 
     //______________________________________________________________________________________________
@@ -410,6 +604,17 @@ public class PlayerActivity extends AppCompatActivity {
     }
     //______________________________________________________________________________________________
 
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (brightness > 0){
+            setScreenBrightness(brightness);
+        }
+        setVolume(volume);
+    }
+
     @Override
     protected void onPause() {
         super.onPause();
@@ -422,11 +627,106 @@ public class PlayerActivity extends AppCompatActivity {
         exoPlayer.release();
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        exoPlayer.stop();
+        exoPlayer.release();
+    }
+
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+
+        if (keyCode == KeyEvent.KEYCODE_VOLUME_UP || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN){
+            setVolumeVariable();
+        }
+        return super.onKeyUp(keyCode, event);
+    }
+
+    //______________________________________________________________________________________________
+    private void setScreenBrightness(int brightness1){
+
+        float d = 1.0f/SHOW_MAX_BRIGHTNESS;
+
+        WindowManager.LayoutParams lp = getWindow().getAttributes();
+
+        lp.screenBrightness = d * brightness1;
+
+        getWindow().setAttributes(lp);
+    }
+
+    private float getCurrentScreenBrightness() {
+        // Get the current screen brightness value
+        int currentBrightness = 0;
+        try {
+            currentBrightness = Settings.System.getInt(
+                    getContentResolver(),
+                    Settings.System.SCREEN_BRIGHTNESS
+            );
+        } catch (Settings.SettingNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        // Get the maximum brightness value supported by the device's screen
+        int maxBrightness = 255; // Default value; you can get the actual maximum brightness using system APIs
+
+        // Calculate the brightness value in the range [0, 1.0]
+        float brightnessValue = (float) currentBrightness / maxBrightness;
+
+        // Clamp the brightnessValue to the range [0, 1.0]
+        brightnessValue = Math.max(0f, Math.min(1.0f, brightnessValue));
+
+        return brightnessValue;
+    }
+
+    private void setVolume(int volume1){
+
+        int maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+
+        float d = (maxVolume * 1.0f)/SHOW_MAX_VOLUME;
+
+        int newVolume = (int) (d * volume1);
+
+//        Log.d("NUR ALAM", "setVolume1: newVolume=" + newVolume + " float=" + (d * value) + " value=" + value + " d=" + d + " maxVolume=" + maxVolume);
+
+        if (newVolume > maxVolume){
+            newVolume = maxVolume;
+        }
+        if (volume1 == SHOW_MAX_VOLUME && newVolume < maxVolume){
+            newVolume = maxVolume;
+        }
+
+        audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, newVolume, 0);
+    }
+
+    private void setVolumeVariable() {
+
+        volume = (int) ((audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) * 1.0f) / audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC) * SHOW_MAX_VOLUME);
+
+        if (volume > SHOW_MAX_VOLUME){
+            volume = SHOW_MAX_VOLUME;
+        }
+    }
+
     //______________________________________________________________________________________________
     private void initVars() {
         playerView = findViewById(R.id.exo_player_view);
         bufferProgressbar = findViewById(R.id.buffer_progressbar);
         fileNameTV = findViewById(R.id.file_name_tv);
         qualitySelectionBtn = findViewById(R.id.quality_selection_btn);
+        brightnessVolumeContainer = findViewById(R.id.brightness_volume_container);
+        brightnessIcon = findViewById(R.id.brightness_icon);
+        volumeIcon = findViewById(R.id.volume_icon);
+        brightVolumeTV = findViewById(R.id.brightness_volume_tv);
+        backButton = findViewById(R.id.back_button);
+        fitScreenBtn = findViewById(R.id.fit_screen_btn);
+        doubleTapSkipBackwardIcon = findViewById(R.id.double_tap_skip_backward_icon);
+        doubleTapSkipForwardIcon = findViewById(R.id.double_tab_skip_forward_icon);
+        backward10 = findViewById(R.id.backward_10);
+        forward10 = findViewById(R.id.forward_10);
+        screenRotateBtn = findViewById(R.id.screen_rotate_btn);
+
+        audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
     }
+//  ------------------------------------------------------------------------------------------------
 }

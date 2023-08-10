@@ -6,7 +6,6 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.media3.common.util.UnstableApi;
@@ -71,14 +70,8 @@ import java.util.Objects;
         drmSchemeSelector.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
-
                 drmSchemeAdapter.setShowPlaceholder(false);
-                // Handle the selected item
-                String selectedItem = drmSchemes[position];
-
-                Toast.makeText(MainActivity.this, selectedItem, Toast.LENGTH_SHORT).show();
             }
-
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {
 

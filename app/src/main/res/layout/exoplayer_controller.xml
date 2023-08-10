@@ -84,6 +84,12 @@
             android:layoutDirection="ltr">
 
             <ImageButton
+                android:id="@+id/screen_rotate_btn"
+                style="@style/ExoStyledControls.Button.Bottom.RepeatToggle"
+                android:src="@drawable/screen_rotation_24"
+                tools:ignore="ContentDescription" />
+
+            <ImageButton
                 android:id="@+id/fit_screen_btn"
                 style="@style/ExoStyledControls.Button.Bottom.RepeatToggle"
                 android:src="@drawable/crop_free"
@@ -161,8 +167,9 @@
             android:src="@drawable/replay_10_24"
             android:layout_marginHorizontal="50dp"
             tools:ignore="ContentDescription"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
+            android:layout_height="35dp"
+            android:layout_width="35dp"
+            android:scaleType="fitXY"
             android:background="@null"/>
 
         <ImageButton
@@ -176,8 +183,9 @@
             android:src="@drawable/forward_10_24"
             android:layout_marginHorizontal="50dp"
             tools:ignore="ContentDescription"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
+            android:layout_height="35dp"
+            android:layout_width="35dp"
+            android:scaleType="fitXY"
             android:background="@null" />
 
     </LinearLayout>
