@@ -1,16 +1,22 @@
 package com.venomdino.exonetworkstreamer.activities;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.LinearLayout;
 import android.widget.Spinner;
+import android.widget.TextView;
 
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.media3.common.util.UnstableApi;
 
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.venomdino.exonetworkstreamer.R;
@@ -23,12 +29,14 @@ import java.util.Objects;
 
 @UnstableApi public class MainActivity extends AppCompatActivity {
 
-    Spinner userAgentSpinner, drmSchemeSelector;
-    TextInputLayout mediaUrlTil, drmLicenceTil;
-    TextInputEditText mediaUrlTiet, drmLicenceTiet;
-    MaterialButton playBtn;
-    LinearLayout rootLayout;
+    private Spinner userAgentSpinner, drmSchemeSelector;
+    private TextInputLayout mediaUrlTil, drmLicenceTil;
+    private TextInputEditText mediaUrlTiet, drmLicenceTiet;
+    private MaterialButton playBtn;
+    private DrawerLayout drawerLayout;
+    private NavigationView navigationView;
 
+    @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,6 +44,21 @@ import java.util.Objects;
 
         initVars();
 
+//        ------------------------------------------------------------------------------------------
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayShowTitleEnabled(false);
+
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, 0, 0);
+        toggle.syncState();
+
+        drawerLayout.addDrawerListener(toggle);
+
+        View headView = navigationView.getHeaderView(0);
+
+        ((TextView) headView.findViewById(R.id.header_layout_version_tv)).setText("Version: " + CustomMethods.getVersionName(this));
+
+        navigationViewItemClickedActions(navigationView);
 //        ------------------------------------------------------------------------------------------
         String[] userAgentBrowserNames = getResources().getStringArray(R.array.agent_browsers_names);
         String userAgentPlaceholder = "User-agent (Default)";
@@ -79,7 +102,7 @@ import java.util.Objects;
         });
 //        ------------------------------------------------------------------------------------------
 
-        rootLayout.setOnClickListener(view -> {
+        drawerLayout.setOnClickListener(view -> {
 
             List<TextInputEditText> textInputEditTextList = findAllTextInputEditText();
 
@@ -153,7 +176,8 @@ import java.util.Objects;
 
         playBtn = findViewById(R.id.play_btn);
 
-        rootLayout = findViewById(R.id.root_layout);
+        drawerLayout = findViewById(R.id.root_layout);
+        navigationView = findViewById(R.id.navigation_drawer);
     }
 //    ==============================================================================================
 
@@ -165,5 +189,29 @@ import java.util.Objects;
         editTextList.add(drmLicenceTiet);
 
         return editTextList;
+    }
+//    ==============================================================================================
+    private void navigationViewItemClickedActions(NavigationView navigationView) {
+
+        navigationView.setNavigationItemSelectedListener(item -> {
+
+            if (item.getItemId() == R.id.report_bug_action){
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.github_repo_link))));
+            }
+            else if (item.getItemId() == R.id.share_action){
+                Intent intent1 = new Intent(Intent.ACTION_SEND);
+                intent1.setType("text/plain");
+                intent1.putExtra(Intent.EXTRA_TEXT, getResources().getString(R.string.app_sharing_message) + getPackageName());
+                startActivity(Intent.createChooser(intent1, "Share via"));
+            }
+
+            else if (item.getItemId() == R.id.more_apps_action) {
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.more_apps))));
+            }
+            else if (item.getItemId() == R.id.visit_telegram){
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.official_telegram_channel))));
+            }
+            return false;
+        });
     }
 }

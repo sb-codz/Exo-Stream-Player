@@ -3,15 +3,37 @@ package com.venomdino.exonetworkstreamer.helpers;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
 import com.venomdino.exonetworkstreamer.R;
 
 import java.net.URL;
+import java.net.URLDecoder;
 
 public class CustomMethods {
 
+    public static String getVersionName(Context context) {
+        PackageInfo packageInfo = null;
+        try {
+            packageInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+        } catch (PackageManager.NameNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        return packageInfo.versionName;
+    }
+
+    public static int getVersionCode(Context context) {
+        PackageInfo packageInfo = null;
+        try {
+            packageInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+        } catch (PackageManager.NameNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        return packageInfo.versionCode;
+    }
     public static void hideSoftKeyboard(Activity activity) {
         View view = activity.getCurrentFocus();
         if (view != null) {
@@ -20,13 +42,23 @@ public class CustomMethods {
         }
     }
 
-    public static boolean isValidURL(String link) {
+    public static boolean isValidURL(String url) {
+        // Preprocess the URL by decoding any percent-encoded characters
         try {
-            URL url = new URL(link);
-            url.toURI();
+            URL url1 = new URL(decodeURL(url));
+            url1.toURI();
             return true;
-        } catch (Exception e) {
+        } catch (Exception e){
             return false;
+        }
+    }
+
+    public static String decodeURL(String url) {
+        try {
+            return URLDecoder.decode(url, "UTF-8");
+        } catch (Exception e) {
+            // Handle the decoding error (you can log or return the original URL)
+            return url;
         }
     }
 

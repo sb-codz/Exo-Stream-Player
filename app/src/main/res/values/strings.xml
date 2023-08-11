@@ -26,4 +26,9 @@
 
     <string name="default_drm_licence_url">https://cwip-shaka-proxy.appspot.com/no_auth</string>
     <string name="default_useragent">Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36</string>
+
+    <string name="github_repo_link">https://github.com/VenomDino/Exo-Stream-Player</string>
+    <string name="app_sharing_message">One of the best video player. Download now https://play.google.com/store/apps/details?id=</string>
+    <string name="more_apps"><![CDATA[https://play.google.com/store/search?q=pub:+Venom+Dino&c=apps]]></string>
+    <string name="official_telegram_channel">https://t.me/VenomDinoTG</string>
 </resources>

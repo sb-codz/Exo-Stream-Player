@@ -6,4 +6,6 @@
     <color name="gray">#888888</color>
     <color name="fade_white">#E0DEDE</color>
     <color name="red">#FF1100</color>
+    <color name="day_blue">#077AF3</color>
+    <color name="fade_black">#171717</color>
 </resources>

@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.media.AudioManager;
 import android.net.Uri;
@@ -70,19 +71,18 @@ import java.util.UUID;
 
 @UnstableApi
 public class PlayerActivity extends AppCompatActivity {
-    String mediaStreamUrl, drmLicenceUrl;
-    String userAgent;
-    int selectedDrmScheme, selectedUserAgent;
-    PlayerView playerView;
-    ProgressBar bufferProgressbar;
-    ExoPlayer exoPlayer;
-    DefaultTrackSelector defaultTrackSelector;
-    ArrayList<String> videoQualities;
-    TextView fileNameTV, brightVolumeTV;
-    LinearLayout brightnessVolumeContainer;
-    ImageView volumeIcon, brightnessIcon;
-    ImageButton screenRotateBtn, qualitySelectionBtn, backButton, fitScreenBtn, backward10, forward10;
-    Button doubleTapSkipBackwardIcon, doubleTapSkipForwardIcon;
+    private String mediaStreamUrl, drmLicenceUrl;
+    private String userAgent;
+    private PlayerView playerView;
+    private ProgressBar bufferProgressbar;
+    private ExoPlayer exoPlayer;
+    private DefaultTrackSelector defaultTrackSelector;
+    private ArrayList<String> videoQualities;
+    private TextView fileNameTV, brightVolumeTV;
+    private LinearLayout brightnessVolumeContainer;
+    private ImageView volumeIcon, brightnessIcon;
+    private ImageButton screenRotateBtn, qualitySelectionBtn, backButton, fitScreenBtn, backward10, forward10;
+    private Button doubleTapSkipBackwardIcon, doubleTapSkipForwardIcon;
     private int touchPositionX;
     GestureDetectorCompat gestureDetectorCompat;
     private int brightness = 0;
@@ -91,9 +91,8 @@ public class PlayerActivity extends AppCompatActivity {
     private final int SHOW_MAX_BRIGHTNESS = 100;
     private final int SHOW_MAX_VOLUME = 50;
     boolean shouldShowController = true;
-    private boolean isPortrait = true;
     int selectedQualityIndex = 0;
-    UUID drmScheme;
+    private UUID drmScheme;
     private boolean playWhenReady = true;
     private long playbackPosition = C.TIME_UNSET;
 
@@ -126,8 +125,8 @@ public class PlayerActivity extends AppCompatActivity {
 
         mediaStreamUrl = intent.getStringExtra("mediaStreamUrl");
         drmLicenceUrl = intent.getStringExtra("drmLicenceUrl");
-        selectedUserAgent = intent.getIntExtra("selectedAgent", 0);
-        selectedDrmScheme = intent.getIntExtra("selectedDrmScheme", 0);
+        int selectedUserAgent = intent.getIntExtra("selectedAgent", 0);
+        int selectedDrmScheme = intent.getIntExtra("selectedDrmScheme", 0);
 
 
         if (drmLicenceUrl.equalsIgnoreCase("none")) {
@@ -167,14 +166,15 @@ public class PlayerActivity extends AppCompatActivity {
 
 //        ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         screenRotateBtn.setOnClickListener(view -> {
-            if (isPortrait) {
-                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-                isPortrait = false;
-            } else {
+            int currentOrientation = getResources().getConfiguration().orientation;
+
+            if (currentOrientation == Configuration.ORIENTATION_PORTRAIT) {
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+            } else if (currentOrientation == Configuration.ORIENTATION_LANDSCAPE) {
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-                isPortrait = true;
             }
         });
+
 //        ..........................................................................................
         qualitySelectionBtn.setOnClickListener(view -> {
 
