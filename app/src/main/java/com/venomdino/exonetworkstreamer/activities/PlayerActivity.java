@@ -376,7 +376,7 @@ public class PlayerActivity extends AppCompatActivity {
                 .setLoadControl(loadControl)
                 .build();
 
-        if (mediaStreamUrl.toLowerCase().contains(".m3u8")) {
+        if (mediaStreamUrl.toLowerCase().contains(".m3u8") || mediaStreamUrl.toLowerCase().contains(".m3u")) {
             MediaSource mediaSource = buildHlsMediaSource(Uri.parse(mediaStreamUrl), userAgent, drmLicenceUrl);
             exoPlayer.setMediaSource(mediaSource);
         } else if (mediaStreamUrl.toLowerCase().contains(".mpd")) {
@@ -423,7 +423,7 @@ public class PlayerActivity extends AppCompatActivity {
                 exoPlayer.stop();
                 exoPlayer.release();
 
-                CustomMethods.errorAlert(PlayerActivity.this, "Error", error.getMessage(), "Ok", true);
+                CustomMethods.errorAlert(PlayerActivity.this, "Error", error.getMessage() + "\n" + error.getErrorCodeName(), "Ok", true);
             }
         });
 
@@ -686,8 +686,6 @@ public class PlayerActivity extends AppCompatActivity {
         float d = (maxVolume * 1.0f)/SHOW_MAX_VOLUME;
 
         int newVolume = (int) (d * volume1);
-
-//        Log.d("NUR ALAM", "setVolume1: newVolume=" + newVolume + " float=" + (d * value) + " value=" + value + " d=" + d + " maxVolume=" + maxVolume);
 
         if (newVolume > maxVolume){
             newVolume = maxVolume;

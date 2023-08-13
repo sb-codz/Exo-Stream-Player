@@ -43,14 +43,13 @@ public class CustomMethods {
     }
 
     public static boolean isValidURL(String url) {
-        // Preprocess the URL by decoding any percent-encoded characters
-        try {
-            URL url1 = new URL(decodeURL(url));
-            url1.toURI();
+        String firstEightCharacters = url.substring(0, Math.min(url.length(), 8));
+
+        if (firstEightCharacters.toLowerCase().startsWith("ftp://")){
             return true;
-        } catch (Exception e){
-            return false;
-        }
+        } else if (firstEightCharacters.toLowerCase().startsWith("http://")){
+            return true;
+        } else return firstEightCharacters.toLowerCase().startsWith("https://");
     }
 
     public static String decodeURL(String url) {
