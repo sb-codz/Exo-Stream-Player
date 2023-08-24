@@ -118,8 +118,8 @@ import java.util.Objects;
 
             boolean shouldStartPlaying = true;
 
-            String mediaStreamUrl = Objects.requireNonNull(mediaUrlTiet.getText()).toString();
-            String drmLicenceUrl = Objects.requireNonNull(drmLicenceTiet.getText()).toString();
+            String mediaStreamUrl = Objects.requireNonNull(mediaUrlTiet.getText()).toString().trim();
+            String drmLicenceUrl = Objects.requireNonNull(drmLicenceTiet.getText()).toString().trim();
 
             int selectedAgent = userAgentSpinner.getSelectedItemPosition();
             int selectedDrmScheme = drmSchemeSelector.getSelectedItemPosition();
