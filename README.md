@@ -58,7 +58,7 @@ Follow these instructions to get the Exo Stream Player app up and running on you
       Screenshot 2
     </td>
     <td align="center">
-      <img src="/screenshots/c.png" alt="Screenshot 2" width="300"/>
+      <img src="/screenshots/c.png" alt="Screenshot 3" width="300"/>
       <br />
       Screenshot 3
     </td>
