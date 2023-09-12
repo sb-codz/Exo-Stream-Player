@@ -11,12 +11,11 @@ import android.view.inputmethod.InputMethodManager;
 import com.venomdino.exonetworkstreamer.R;
 
 import java.net.URL;
-import java.net.URLDecoder;
 
 public class CustomMethods {
 
     public static String getVersionName(Context context) {
-        PackageInfo packageInfo = null;
+        PackageInfo packageInfo;
         try {
             packageInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
         } catch (PackageManager.NameNotFoundException e) {
@@ -25,15 +24,6 @@ public class CustomMethods {
         return packageInfo.versionName;
     }
 
-    public static int getVersionCode(Context context) {
-        PackageInfo packageInfo = null;
-        try {
-            packageInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
-        } catch (PackageManager.NameNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-        return packageInfo.versionCode;
-    }
     public static void hideSoftKeyboard(Activity activity) {
         View view = activity.getCurrentFocus();
         if (view != null) {
@@ -51,16 +41,6 @@ public class CustomMethods {
             return true;
         } else return firstEightCharacters.toLowerCase().startsWith("https://");
     }
-
-    public static String decodeURL(String url) {
-        try {
-            return URLDecoder.decode(url, "UTF-8");
-        } catch (Exception e) {
-            // Handle the decoding error (you can log or return the original URL)
-            return url;
-        }
-    }
-
 
     public static String getFileName(String url) {
 
@@ -95,14 +75,11 @@ public class CustomMethods {
                     dialogInterface.dismiss();
                 }
             });
-            builder.setNegativeButton("Copy", (dialog, which) -> {
-                activity.finish();
-            });
+            builder.setNegativeButton("Copy", (dialog, which) -> activity.finish());
             AlertDialog dialog = builder.create();
             dialog.show();
         }
     }
-
 
 
     public static void hideSystemUI(Activity activity) {

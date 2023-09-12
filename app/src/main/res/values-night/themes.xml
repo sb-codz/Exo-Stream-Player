@@ -4,6 +4,7 @@
         <!-- Customize your dark theme here. -->
         <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
 
+        <item name="colorPrimary">@color/day_blue</item>
         <item name="main_theme_color">@color/day_blue</item>
         <item name="background_color">@color/fade_black</item>
         <item name="text_color">@color/white</item>

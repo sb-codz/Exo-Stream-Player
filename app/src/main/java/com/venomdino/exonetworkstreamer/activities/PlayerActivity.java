@@ -10,6 +10,7 @@ import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
 import android.view.GestureDetector;
 import android.view.KeyEvent;
@@ -66,6 +67,8 @@ import com.venomdino.exonetworkstreamer.helpers.DoubleClickListener;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -192,17 +195,15 @@ public class PlayerActivity extends AppCompatActivity {
 //        ..........................................................................................
         fitScreenBtn.setOnClickListener(v -> {
 
-            if (playerView.getResizeMode() == AspectRatioFrameLayout.RESIZE_MODE_FIT){
+            if (playerView.getResizeMode() == AspectRatioFrameLayout.RESIZE_MODE_FIT) {
                 playerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_ZOOM);
                 fitScreenBtn.setImageResource(R.drawable.crop_5_4);
                 Toast.makeText(this, "ZOOM", Toast.LENGTH_SHORT).show();
-            }
-            else if (playerView.getResizeMode() == AspectRatioFrameLayout.RESIZE_MODE_ZOOM){
+            } else if (playerView.getResizeMode() == AspectRatioFrameLayout.RESIZE_MODE_ZOOM) {
                 playerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FILL);
                 fitScreenBtn.setImageResource(R.drawable.fit_screen);
                 Toast.makeText(this, "FILL", Toast.LENGTH_SHORT).show();
-            }
-            else if (playerView.getResizeMode() == AspectRatioFrameLayout.RESIZE_MODE_FILL){
+            } else if (playerView.getResizeMode() == AspectRatioFrameLayout.RESIZE_MODE_FILL) {
                 playerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FIT);
                 fitScreenBtn.setImageResource(R.drawable.crop_free);
                 Toast.makeText(this, "FIT", Toast.LENGTH_SHORT).show();
@@ -211,7 +212,7 @@ public class PlayerActivity extends AppCompatActivity {
 //        ..........................................................................................
         backButton.setOnClickListener(view -> {
 
-            if (exoPlayer != null){
+            if (exoPlayer != null) {
                 exoPlayer.stop();
                 exoPlayer.release();
             }
@@ -225,21 +226,21 @@ public class PlayerActivity extends AppCompatActivity {
 
             gestureDetectorCompat.onTouchEvent(motionEvent);
 
-            if (motionEvent.getAction() == MotionEvent.ACTION_UP){
+            if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
                 brightnessVolumeContainer.setVisibility(View.GONE);
 
-                if (!shouldShowController){
+                if (!shouldShowController) {
 
                     playerView.setUseController(false);
 
-                    new Handler().postDelayed(()-> {
+                    new Handler().postDelayed(() -> {
                         shouldShowController = true;
                         playerView.setUseController(true);
                     }, 500);
                 }
             }
 
-            if (motionEvent.getAction() == MotionEvent.ACTION_DOWN){
+            if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
                 touchPositionX = (int) motionEvent.getX();
             }
             return false;
@@ -248,23 +249,22 @@ public class PlayerActivity extends AppCompatActivity {
         playerView.setOnClickListener(new DoubleClickListener(500, () -> {
 
             playerView.setUseController(false);
-            new Handler().postDelayed(()-> playerView.setUseController(true),500);
+            new Handler().postDelayed(() -> playerView.setUseController(true), 500);
 
             int deviceWidth = Resources.getSystem().getDisplayMetrics().widthPixels;
 
-            if (touchPositionX < deviceWidth/2){
+            if (touchPositionX < deviceWidth / 2) {
                 doubleTapSkipBackwardIcon.setVisibility(View.VISIBLE);
-                new Handler().postDelayed(()-> doubleTapSkipBackwardIcon.setVisibility(View.GONE),500);
+                new Handler().postDelayed(() -> doubleTapSkipBackwardIcon.setVisibility(View.GONE), 500);
                 exoPlayer.seekTo(exoPlayer.getCurrentPosition() - 10000);
-            }
-            else{
+            } else {
                 doubleTapSkipForwardIcon.setVisibility(View.VISIBLE);
-                new Handler().postDelayed(()-> doubleTapSkipForwardIcon.setVisibility(View.GONE),500);
+                new Handler().postDelayed(() -> doubleTapSkipForwardIcon.setVisibility(View.GONE), 500);
                 exoPlayer.seekTo(exoPlayer.getCurrentPosition() + 10000);
             }
         }));
 //        ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-                                         //Gesture Detect Section//
+        //Gesture Detect Section//
 //        ******************************************************************************************
         gestureDetectorCompat = new GestureDetectorCompat(this, new GestureDetector.OnGestureListener() {
             @Override
@@ -297,13 +297,13 @@ public class PlayerActivity extends AppCompatActivity {
 
                 int deviceWidth = Resources.getSystem().getDisplayMetrics().widthPixels;
 
-                if (Math.abs(distanceY) > Math.abs(distanceX)){
+                if (Math.abs(distanceY) > Math.abs(distanceX)) {
 
                     brightnessVolumeContainer.setVisibility(View.VISIBLE);
 
                     shouldShowController = false;
 
-                    if (motionEvent.getX() < deviceWidth/2){
+                    if (motionEvent.getX() < deviceWidth / 2) {
 
                         volumeIcon.setVisibility(View.GONE);
                         brightnessIcon.setVisibility(View.VISIBLE);
@@ -312,16 +312,15 @@ public class PlayerActivity extends AppCompatActivity {
 
                         int newValue = (increase) ? brightness + 1 : brightness - 1;
 
-                        if (newValue >= 0 && newValue <= SHOW_MAX_BRIGHTNESS){
+                        if (newValue >= 0 && newValue <= SHOW_MAX_BRIGHTNESS) {
                             brightness = newValue;
                         }
 
                         brightVolumeTV.setText(String.valueOf(brightness));
                         setScreenBrightness(brightness);
-                    }
-                    else{
+                    } else {
 
-                        if (audioManager != null){
+                        if (audioManager != null) {
 
                             volumeIcon.setVisibility(View.VISIBLE);
                             brightnessIcon.setVisibility(View.GONE);
@@ -330,7 +329,7 @@ public class PlayerActivity extends AppCompatActivity {
 
                             int newValue = (increase) ? volume + 1 : volume - 1;
 
-                            if (newValue >= 0 && newValue <= SHOW_MAX_VOLUME){
+                            if (newValue >= 0 && newValue <= SHOW_MAX_VOLUME) {
                                 volume = newValue;
                             }
 
@@ -376,14 +375,43 @@ public class PlayerActivity extends AppCompatActivity {
                 .setLoadControl(loadControl)
                 .build();
 
-        if (mediaStreamUrl.toLowerCase().contains(".m3u8") || mediaStreamUrl.toLowerCase().contains(".m3u")) {
+        if (mediaStreamUrl.toLowerCase().contains(".m3u8") || mediaStreamUrl.toLowerCase().contains(".m3u") || mediaStreamUrl.toLowerCase().contains(".playlist")) {
             MediaSource mediaSource = buildHlsMediaSource(Uri.parse(mediaStreamUrl), userAgent, drmLicenceUrl);
             exoPlayer.setMediaSource(mediaSource);
         } else if (mediaStreamUrl.toLowerCase().contains(".mpd")) {
             MediaSource mediaSource = buildDashMediaSource(Uri.parse(mediaStreamUrl), userAgent, drmLicenceUrl);
             exoPlayer.setMediaSource(mediaSource);
         } else {
-            exoPlayer.setMediaItem(MediaItem.fromUri(Uri.parse(mediaStreamUrl)));
+
+            new Thread(() -> {
+                try {
+                    URL url = new URL(mediaStreamUrl);
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setRequestMethod("HEAD");  // Use HEAD request to check content type
+
+                    // Enable following redirects
+                    conn.setInstanceFollowRedirects(true);
+
+                    if (conn.getResponseCode() == 200) {
+
+                        String contentType = conn.getContentType();
+
+                        if (contentType.equalsIgnoreCase("application/x-mpegURL")) {
+                            MediaSource mediaSource = buildHlsMediaSource(Uri.parse(mediaStreamUrl), userAgent, drmLicenceUrl);
+                            new Handler(Looper.getMainLooper()).post(() -> exoPlayer.setMediaSource(mediaSource));
+                        } else if (contentType.equalsIgnoreCase("application/dash+xml")) {
+                            MediaSource mediaSource = buildDashMediaSource(Uri.parse(mediaStreamUrl), userAgent, drmLicenceUrl);
+                            new Handler(Looper.getMainLooper()).post(() -> exoPlayer.setMediaSource(mediaSource));
+                        } else {
+                            new Handler(Looper.getMainLooper()).post(() -> exoPlayer.setMediaItem(MediaItem.fromUri(Uri.parse(mediaStreamUrl))));
+                        }
+                    }
+                    conn.disconnect();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    new Handler(Looper.getMainLooper()).post(() -> exoPlayer.setMediaItem(MediaItem.fromUri(Uri.parse(mediaStreamUrl))));
+                }
+            }).start();
         }
 
         exoPlayer.prepare();
@@ -583,10 +611,10 @@ public class PlayerActivity extends AppCompatActivity {
     //______________________________________________________________________________________________
 
     /**
-     Save and Restore Playback State:
-     To maintain the playback state across different app states (minimized, restored),
-     you can save and restore the playback state. You can do this using the
-     onSaveInstanceState and onRestoreInstanceState methods. Here's an example:
+     * Save and Restore Playback State:
+     * To maintain the playback state across different app states (minimized, restored),
+     * you can save and restore the playback state. You can do this using the
+     * onSaveInstanceState and onRestoreInstanceState methods. Here's an example:
      */
 
     @Override
@@ -609,7 +637,7 @@ public class PlayerActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        if (brightness > 0){
+        if (brightness > 0) {
             setScreenBrightness(brightness);
         }
         setVolume(volume);
@@ -637,16 +665,16 @@ public class PlayerActivity extends AppCompatActivity {
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
 
-        if (keyCode == KeyEvent.KEYCODE_VOLUME_UP || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN){
+        if (keyCode == KeyEvent.KEYCODE_VOLUME_UP || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
             setVolumeVariable();
         }
         return super.onKeyUp(keyCode, event);
     }
 
     //______________________________________________________________________________________________
-    private void setScreenBrightness(int brightness1){
+    private void setScreenBrightness(int brightness1) {
 
-        float d = 1.0f/SHOW_MAX_BRIGHTNESS;
+        float d = 1.0f / SHOW_MAX_BRIGHTNESS;
 
         WindowManager.LayoutParams lp = getWindow().getAttributes();
 
@@ -679,18 +707,18 @@ public class PlayerActivity extends AppCompatActivity {
         return brightnessValue;
     }
 
-    private void setVolume(int volume1){
+    private void setVolume(int volume1) {
 
         int maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
 
-        float d = (maxVolume * 1.0f)/SHOW_MAX_VOLUME;
+        float d = (maxVolume * 1.0f) / SHOW_MAX_VOLUME;
 
         int newVolume = (int) (d * volume1);
 
-        if (newVolume > maxVolume){
+        if (newVolume > maxVolume) {
             newVolume = maxVolume;
         }
-        if (volume1 == SHOW_MAX_VOLUME && newVolume < maxVolume){
+        if (volume1 == SHOW_MAX_VOLUME && newVolume < maxVolume) {
             newVolume = maxVolume;
         }
 
@@ -701,7 +729,7 @@ public class PlayerActivity extends AppCompatActivity {
 
         volume = (int) ((audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) * 1.0f) / audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC) * SHOW_MAX_VOLUME);
 
-        if (volume > SHOW_MAX_VOLUME){
+        if (volume > SHOW_MAX_VOLUME) {
             volume = SHOW_MAX_VOLUME;
         }
     }
