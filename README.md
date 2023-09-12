@@ -1,43 +1,66 @@
 # Exo Stream Player
 
-Exo Stream Player is an open-source video player that leverages the power of ExoPlayer to provide a seamless video playback experience. It's designed to play a wide range of video formats, including both local videos stored on your device and online videos from URLs. With a user-friendly interface and customizable features, Exo Stream Player is your gateway to enjoyable video entertainment.
+Exo Stream Player is an open-source video streaming app that allows users to stream videos from direct links, including popular formats like M3U8 and MPD. It offers a seamless, ad-free streaming experience with multi-resolution and adaptive playback capabilities.
+
+[![License](https://img.shields.io/github/license/VenomDino/Exo-Stream-Player)](https://github.com/VenomDino/Exo-Stream-Player/blob/master/LICENSE)
+[![GitHub Stars](https://img.shields.io/github/stars/VenomDino/Exo-Stream-Player)](https://github.com/VenomDino/Exo-Stream-Player/stargazers)
+[![GitHub Forks](https://img.shields.io/github/forks/VenomDino/Exo-Stream-Player)](https://github.com/VenomDino/Exo-Stream-Player/network/members)
+[![GitHub Issues](https://img.shields.io/github/issues/VenomDino/Exo-Stream-Player)](https://github.com/VenomDino/Exo-Stream-Player/issues)
+[![GitHub Pull Requests](https://img.shields.io/github/issues-pr/VenomDino/Exo-Stream-Player)](https://github.com/VenomDino/Exo-Stream-Player/pulls)
 
 ## Features
 
-- Universal Compatibility: Play local video files and stream online content through URLs.
-- Intuitive Interface: Enjoy an effortless navigation experience with user-friendly controls.
-- Playlist Management: Create and manage playlists, mark favorites, and organize your video library.
-- Quick Search: Easily find videos using the powerful search feature.
-- Customizable Playback: Adjust playback settings, including speed and subtitles, to suit your preferences.
-- High-Quality Audio and Video: Immerse yourself in stunning visuals and audio with support for various formats.
-- Network Resilience: Seamless streaming, even with unstable network connections.
-- Open Source Advantage: Built on the ExoPlayer foundation, benefiting from continuous updates and community support.
+- Universal Compatibility: Supports a wide range of video container formats.
+- Direct Link Playback: Simply paste the direct video link and enjoy smooth playback.
+- High-Quality Streaming: Experience high-quality video streaming even on slower networks.
+- Multi-Resolution & Adaptive Play: Easily switch between resolutions for the best viewing experience.
+- Intuitive Interface: User-friendly design for effortless navigation.
+- No Ads, No Distractions: Enjoy an ad-free streaming experience.
+- Privacy and Security: Your data security is a priority; we don't collect personal information.
+- Optimized for Mobile: Works seamlessly on smartphones and tablets.
+- Open Source: Developers can contribute to enhance the app's capabilities.
 
 ## Getting Started
 
-1. Clone the repository: `git clone https://github.com/VenomDino/Exo-Stream-Player.git`
+Follow these instructions to get the Exo Stream Player app up and running on your local machine or contribute to the project.
+
+### Prerequisites
+
+- Android Studio with Android SDK installed
+- Git installed on your machine
+
+### Installation
+
+1. Clone the repository:
+
+   ```shell
+   git clone https://github.com/VenomDino/Exo-Stream-Player.git
 2. Open the project in Android Studio.
-3. Build and run the app on your preferred device or emulator.
+3. Build and run the app on an emulator or a physical device.
 
-## Try the Demo
+### Usage
+1. Launch the app on your Android device.
+2. Paste the direct video link (M3U8, MPD, or other supported formats) into the app.
+3. Enjoy seamless, ad-free video streaming with multi-resolution and adaptive playback.
 
-Check out the [demo app on Play Store](https://play.google.com/store/apps/details?id=com.venomdino.exonetworkstreamer) to experience Exo Stream Player in action.
+### Screenshots
 
-## Contributing
-
-We welcome contributions from the community! If you'd like to contribute to Exo Stream Player, follow these steps:
-
-1. Fork the repository.
-2. Create a new branch for your feature or bug fix: `git checkout -b feature-name`.
-3. Make your changes and test thoroughly.
-4. Commit your changes: `git commit -m "Add your commit message here"`.
-5. Push to your forked repository: `git push origin feature-name`.
-6. Open a pull request to the `main` branch of this repository.
-
-## Support and Contact
-
-For bug reports, feature requests, and general inquiries, please submit an issue on the [GitHub repository](https://github.com/VenomDino/Exo-Stream-Player).
-
-## License
-
-Exo Stream Player is released under the [MIT License] License. See [LICENSE](LICENSE) for more details.
+   <table>
+  <tr>
+    <td align="center">
+      <img src="/screenshots/a.png" alt="Screenshot 1" width="300"/>
+      <br />
+      Screenshot 1
+    </td>
+    <td align="center">
+      <img src="/screenshots/b.png" alt="Screenshot 2" width="300"/>
+      <br />
+      Screenshot 2
+    </td>
+    <td align="center">
+      <img src="/screenshots/c.png" alt="Screenshot 2" width="300"/>
+      <br />
+      Screenshot 3
+    </td>
+  </tr>
+</table>
