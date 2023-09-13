@@ -2,9 +2,12 @@ package com.venomdino.exonetworkstreamer.helpers;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.Handler;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
@@ -24,15 +27,13 @@ public class CustomMethods {
         return packageInfo.versionName;
     }
 
-    public static void hideSoftKeyboard(Activity activity) {
-        View view = activity.getCurrentFocus();
-        if (view != null) {
-            InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-        }
+    public static void hideSoftKeyboard(Context context, View view) {
+        InputMethodManager imm = (InputMethodManager) context.getSystemService(Activity.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
     public static boolean isValidURL(String url) {
+
         String firstEightCharacters = url.substring(0, Math.min(url.length(), 8));
 
         if (firstEightCharacters.toLowerCase().startsWith("ftp://")){
@@ -75,7 +76,14 @@ public class CustomMethods {
                     dialogInterface.dismiss();
                 }
             });
-            builder.setNegativeButton("Copy", (dialog, which) -> activity.finish());
+            builder.setNegativeButton("Copy", (dialog, which) -> {
+
+                ClipboardManager clipboardManager = (ClipboardManager) activity.getSystemService(Context.CLIPBOARD_SERVICE);
+                ClipData clipData = ClipData.newPlainText("text", errorBody);
+                clipboardManager.setPrimaryClip(clipData);
+
+                new Handler().postDelayed(activity::finish,1000);
+            });
             AlertDialog dialog = builder.create();
             dialog.show();
         }

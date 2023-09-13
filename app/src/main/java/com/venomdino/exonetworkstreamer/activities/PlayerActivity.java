@@ -396,7 +396,7 @@ public class PlayerActivity extends AppCompatActivity {
 
                         String contentType = conn.getContentType();
 
-                        if (contentType.equalsIgnoreCase("application/x-mpegURL")) {
+                        if (contentType.equalsIgnoreCase("application/x-mpegURL") || contentType.equalsIgnoreCase("application/vnd.apple.mpegurl")) {
                             MediaSource mediaSource = buildHlsMediaSource(Uri.parse(mediaStreamUrl), userAgent, drmLicenceUrl);
                             new Handler(Looper.getMainLooper()).post(() -> exoPlayer.setMediaSource(mediaSource));
                         } else if (contentType.equalsIgnoreCase("application/dash+xml")) {
