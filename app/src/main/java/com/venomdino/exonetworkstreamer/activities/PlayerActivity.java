@@ -44,7 +44,9 @@ import androidx.media3.datasource.HttpDataSource;
 import androidx.media3.exoplayer.DefaultLoadControl;
 import androidx.media3.exoplayer.DefaultRenderersFactory;
 import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.exoplayer.dash.DashChunkSource;
 import androidx.media3.exoplayer.dash.DashMediaSource;
+import androidx.media3.exoplayer.dash.DefaultDashChunkSource;
 import androidx.media3.exoplayer.drm.DefaultDrmSessionManager;
 import androidx.media3.exoplayer.drm.DrmSessionManager;
 import androidx.media3.exoplayer.drm.FrameworkMediaDrm;
@@ -56,6 +58,7 @@ import androidx.media3.exoplayer.trackselection.AdaptiveTrackSelection;
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector;
 import androidx.media3.exoplayer.trackselection.ExoTrackSelection;
 import androidx.media3.exoplayer.trackselection.MappingTrackSelector;
+import androidx.media3.exoplayer.upstream.DefaultBandwidthMeter;
 import androidx.media3.ui.AspectRatioFrameLayout;
 import androidx.media3.ui.PlayerView;
 
@@ -467,8 +470,7 @@ public class PlayerActivity extends AppCompatActivity {
 
         HttpDataSource.Factory licenseDataSourceFactory = new DefaultHttpDataSource.Factory().setUserAgent(userAgent);
 
-        HttpMediaDrmCallback drmCallback = new HttpMediaDrmCallback(drmLicenseUrl, true,
-                licenseDataSourceFactory);
+        HttpMediaDrmCallback drmCallback = new HttpMediaDrmCallback(drmLicenseUrl, true, licenseDataSourceFactory);
 
         return new DefaultDrmSessionManager.Builder()
                 .setUuidAndExoMediaDrmProvider(uuid, FrameworkMediaDrm.DEFAULT_PROVIDER)
@@ -476,22 +478,37 @@ public class PlayerActivity extends AppCompatActivity {
     }
 
     //    ----------------------------------------------------------------------------------------------
-    private DashMediaSource buildDashMediaSource(Uri uri, String userAgent, String drmLicenceUrl) {
+    private DashMediaSource buildDashMediaSource(Uri uri, String userAgent, String drmLicenseUrl) {
+
+        DataSource.Factory defaultHttpDataSourceFactory = new DefaultHttpDataSource.Factory()
+                .setUserAgent(userAgent)
+                .setTransferListener(
+                        new DefaultBandwidthMeter.Builder(PlayerActivity.this)
+                                .setResetOnNetworkTypeChange(false)
+                                .build()
+                );
+
+        DashChunkSource.Factory dashChunkSourceFactory = new DefaultDashChunkSource.Factory(defaultHttpDataSourceFactory);
+
+        DataSource.Factory manifestDataSourceFactory = new DefaultHttpDataSource.Factory().setUserAgent(userAgent);
 
         UUID drmSchemeUuid = Util.getDrmUuid(drmScheme.toString());
 
-        DrmSessionManager drmSessionManager = buildDrmSessionManager(drmSchemeUuid, drmLicenceUrl, userAgent);
+        assert drmSchemeUuid != null;
 
-        DataSource.Factory dataSourceFactory = new DefaultDataSource.Factory(this, new DefaultHttpDataSource.Factory().setUserAgent(userAgent));
-
-        return new DashMediaSource.Factory(dataSourceFactory)
-                .setDrmSessionManagerProvider(unusedMediaItem -> drmSessionManager)
-                .createMediaSource(
-                        new MediaItem.Builder()
-                                .setUri(uri)
-                                .setMimeType(MimeTypes.APPLICATION_MPD)
-                                .build()
-                );
+        return new DashMediaSource.Factory(dashChunkSourceFactory, manifestDataSourceFactory)
+                        .createMediaSource(
+                                new MediaItem.Builder()
+                                        .setUri(uri)
+                                        // DRM Configuration
+                                        .setDrmConfiguration(
+                                                new MediaItem.DrmConfiguration.Builder(drmSchemeUuid)
+                                                        .setLicenseUri(drmLicenseUrl).build()
+                                        )
+                                        .setMimeType(MimeTypes.APPLICATION_MPD)
+                                        .setTag(null)
+                                        .build()
+                        );
     }
 
     //    ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

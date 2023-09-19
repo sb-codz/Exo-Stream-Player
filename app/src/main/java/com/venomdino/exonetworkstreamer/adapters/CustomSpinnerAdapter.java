@@ -14,8 +14,8 @@ import com.venomdino.exonetworkstreamer.R;
 
 public class CustomSpinnerAdapter extends ArrayAdapter<String> {
 
-    private String[] items;
-    private String placeholder;
+    private final String[] items;
+    private final String placeholder;
     private boolean showPlaceholder = true;
 
     public CustomSpinnerAdapter(Context context, String[] items, String placeholder) {
@@ -34,8 +34,9 @@ public class CustomSpinnerAdapter extends ArrayAdapter<String> {
         return showPlaceholder ? null : items[position];
     }
 
+    @NonNull
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(int position, View convertView, @NonNull ViewGroup parent) {
         if (convertView == null) {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.custom_spinner_item, parent, false);
         }

@@ -11,8 +11,8 @@ android {
         minSdk = 24
         //noinspection OldTargetApi
         targetSdk = 33
-        versionCode = 6
-        versionName = "1.6"
+        versionCode = 7
+        versionName = "1.7"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -46,5 +46,4 @@ dependencies {
     implementation ("androidx.media3:media3-ui:1.1.1")
 
     implementation ("com.google.android.play:app-update:2.1.0")
-//    implementation ("commons-validator:commons-validator:1.7")
 }
