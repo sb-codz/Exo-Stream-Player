@@ -383,7 +383,7 @@ public class PlayerActivity extends AppCompatActivity {
             exoPlayer.setMediaSource(mediaSource);
         } else if (mediaStreamUrl.toLowerCase().contains(".mpd")) {
             MediaSource mediaSource = buildDashMediaSource(Uri.parse(mediaStreamUrl), userAgent, drmLicenceUrl);
-            exoPlayer.setMediaSource(mediaSource);
+            exoPlayer.setMediaSource(mediaSource, true);
         } else {
 
             new Thread(() -> {
@@ -482,6 +482,7 @@ public class PlayerActivity extends AppCompatActivity {
 
         DataSource.Factory defaultHttpDataSourceFactory = new DefaultHttpDataSource.Factory()
                 .setUserAgent(userAgent)
+                .setAllowCrossProtocolRedirects(true)
                 .setTransferListener(
                         new DefaultBandwidthMeter.Builder(PlayerActivity.this)
                                 .setResetOnNetworkTypeChange(false)
@@ -490,11 +491,9 @@ public class PlayerActivity extends AppCompatActivity {
 
         DashChunkSource.Factory dashChunkSourceFactory = new DefaultDashChunkSource.Factory(defaultHttpDataSourceFactory);
 
-        DataSource.Factory manifestDataSourceFactory = new DefaultHttpDataSource.Factory().setUserAgent(userAgent);
-
-        UUID drmSchemeUuid = Util.getDrmUuid(drmScheme.toString());
-
-        assert drmSchemeUuid != null;
+        DataSource.Factory manifestDataSourceFactory = new DefaultHttpDataSource.Factory()
+                .setUserAgent(userAgent)
+                .setAllowCrossProtocolRedirects(true);
 
         return new DashMediaSource.Factory(dashChunkSourceFactory, manifestDataSourceFactory)
                         .createMediaSource(
@@ -502,8 +501,9 @@ public class PlayerActivity extends AppCompatActivity {
                                         .setUri(uri)
                                         // DRM Configuration
                                         .setDrmConfiguration(
-                                                new MediaItem.DrmConfiguration.Builder(drmSchemeUuid)
-                                                        .setLicenseUri(drmLicenseUrl).build()
+                                                new MediaItem.DrmConfiguration.Builder(drmScheme)
+                                                        .setLicenseUri(Uri.parse(drmLicenseUrl))
+                                                        .build()
                                         )
                                         .setMimeType(MimeTypes.APPLICATION_MPD)
                                         .setTag(null)
@@ -518,7 +518,9 @@ public class PlayerActivity extends AppCompatActivity {
 
         DrmSessionManager drmSessionManager = buildDrmSessionManager(drmSchemeUuid, drmLicenceUrl, userAgent);
 
-        DataSource.Factory dataSourceFactory = new DefaultDataSource.Factory(this, new DefaultHttpDataSource.Factory().setUserAgent(userAgent));
+        DataSource.Factory dataSourceFactory = new DefaultDataSource.Factory(this, new DefaultHttpDataSource.Factory()
+                .setUserAgent(userAgent)
+                .setAllowCrossProtocolRedirects(true));
 
         return new HlsMediaSource.Factory(dataSourceFactory)
                 .setDrmSessionManagerProvider(unusedMediaItem -> drmSessionManager)
