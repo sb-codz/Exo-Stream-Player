@@ -35,6 +35,7 @@ import androidx.media3.common.MimeTypes;
 import androidx.media3.common.PlaybackException;
 import androidx.media3.common.Player;
 import androidx.media3.common.TrackGroup;
+import androidx.media3.common.TrackSelectionParameters;
 import androidx.media3.common.util.UnstableApi;
 import androidx.media3.common.util.Util;
 import androidx.media3.datasource.DataSource;
@@ -100,6 +101,7 @@ public class PlayerActivity extends AppCompatActivity {
     int selectedQualityIndex = 0;
     private UUID drmScheme;
     private boolean playWhenReady = true;
+    private boolean hasRetried = false;
     private long playbackPosition = C.TIME_UNSET;
 
     private static final CookieManager DEFAULT_COOKIE_MANAGER;
@@ -448,13 +450,27 @@ public class PlayerActivity extends AppCompatActivity {
             @Override
             public void onPlayerError(@NonNull PlaybackException error) {
 
-                playerView.setVisibility(View.GONE);
-                bufferProgressbar.setVisibility(View.GONE);
+                if (error.errorCode == PlaybackException.ERROR_CODE_PARSING_CONTAINER_MALFORMED && !hasRetried){
 
-                exoPlayer.stop();
-                exoPlayer.release();
+                    TrackSelectionParameters trackSelectionParameters = exoPlayer.getTrackSelectionParameters()
+                            .buildUpon()
+                            .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, true)
+                            .clearOverridesOfType(C.TRACK_TYPE_TEXT)
+                            .build();
+                    exoPlayer.setTrackSelectionParameters(trackSelectionParameters);
+                    exoPlayer.prepare();
 
-                CustomMethods.errorAlert(PlayerActivity.this, "Error", error.getMessage() + "\n" + error.getErrorCodeName(), "Ok", true);
+                    Toast.makeText(PlayerActivity.this, "Trying again because playback error.", Toast.LENGTH_SHORT).show();
+                    hasRetried = true;
+                } else {
+                    playerView.setVisibility(View.GONE);
+                    bufferProgressbar.setVisibility(View.GONE);
+
+                    exoPlayer.stop();
+                    exoPlayer.release();
+
+                    CustomMethods.errorAlert(PlayerActivity.this, "Error", error.getMessage() + "\n" + error.getErrorCodeName(), "Ok", true);
+                }
             }
         });
 
