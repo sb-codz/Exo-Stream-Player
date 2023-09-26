@@ -380,7 +380,7 @@ public class PlayerActivity extends AppCompatActivity {
                 .setLoadControl(loadControl)
                 .build();
 
-        if (mediaStreamUrl.toLowerCase().contains(".m3u8") || mediaStreamUrl.toLowerCase().contains(".m3u") || mediaStreamUrl.toLowerCase().contains(".playlist")) {
+        if (mediaStreamUrl.toLowerCase().contains(".m3u8") || mediaStreamUrl.toLowerCase().contains(".ts") || mediaStreamUrl.toLowerCase().contains(".playlist")) {
             MediaSource mediaSource = buildHlsMediaSource(Uri.parse(mediaStreamUrl), userAgent, drmLicenceUrl);
             exoPlayer.setMediaSource(mediaSource);
         } else if (mediaStreamUrl.toLowerCase().contains(".mpd")) {
@@ -401,7 +401,10 @@ public class PlayerActivity extends AppCompatActivity {
 
                         String contentType = conn.getContentType();
 
-                        if (contentType.equalsIgnoreCase("application/x-mpegURL") || contentType.equalsIgnoreCase("application/vnd.apple.mpegurl")) {
+                        if (contentType.equalsIgnoreCase("application/x-mpegURL")
+                                || contentType.equalsIgnoreCase("application/vnd.apple.mpegurl")
+                                || contentType.equalsIgnoreCase("video/mp2t")
+                        ) {
                             MediaSource mediaSource = buildHlsMediaSource(Uri.parse(mediaStreamUrl), userAgent, drmLicenceUrl);
                             new Handler(Looper.getMainLooper()).post(() -> exoPlayer.setMediaSource(mediaSource));
                         } else if (contentType.equalsIgnoreCase("application/dash+xml")) {

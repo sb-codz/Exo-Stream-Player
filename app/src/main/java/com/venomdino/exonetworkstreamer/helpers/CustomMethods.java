@@ -40,6 +40,8 @@ public class CustomMethods {
             return true;
         } else if (firstEightCharacters.toLowerCase().startsWith("http://")){
             return true;
+        }else if (firstEightCharacters.toLowerCase().startsWith("rtmp://")){
+            return true;
         } else return firstEightCharacters.toLowerCase().startsWith("https://");
     }
 
