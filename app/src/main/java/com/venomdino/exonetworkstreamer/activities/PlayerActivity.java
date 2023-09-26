@@ -542,7 +542,8 @@ public class PlayerActivity extends AppCompatActivity {
                 .setAllowCrossProtocolRedirects(true));
 
         return new HlsMediaSource.Factory(dataSourceFactory)
-                .setDrmSessionManagerProvider(unusedMediaItem -> drmSessionManager)
+                .setDrmSessionManagerProvider(mediaItem -> drmSessionManager)
+                .setAllowChunklessPreparation(true)
                 .createMediaSource(
                         new MediaItem.Builder()
                                 .setUri(uri)
