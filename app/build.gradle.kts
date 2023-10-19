@@ -4,15 +4,15 @@ plugins {
 
 android {
     namespace = "com.venomdino.exonetworkstreamer"
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.venomdino.exonetworkstreamer"
         minSdk = 24
-        //noinspection OldTargetApi
-        targetSdk = 33
-        versionCode = 10
-        versionName = "2.0"
+        //noinspection EditedTargetSdkVersion
+        targetSdk = 34
+        versionCode = 11
+        versionName = "2.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -27,12 +27,16 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
+    buildFeatures{
+        viewBinding = true
+        buildConfig = true
+    }
 }
 
 dependencies {
 
     implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("com.google.android.material:material:1.9.0")
+    implementation("com.google.android.material:material:1.10.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
 
     testImplementation("junit:junit:4.13.2")

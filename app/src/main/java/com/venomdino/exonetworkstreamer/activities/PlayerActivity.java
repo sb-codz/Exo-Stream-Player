@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -74,12 +75,13 @@ import java.net.CookiePolicy;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Objects;
 import java.util.UUID;
 
 @UnstableApi
 public class PlayerActivity extends AppCompatActivity {
-    private String mediaStreamUrl, drmLicenceUrl;
-    private String userAgent;
+    private String mediaStreamUrl, drmLicenceUrl, refererValue, userAgent;
     private PlayerView playerView;
     private ProgressBar bufferProgressbar;
     private ExoPlayer exoPlayer;
@@ -103,6 +105,7 @@ public class PlayerActivity extends AppCompatActivity {
     private boolean playWhenReady = true;
     private boolean hasRetried = false;
     private long playbackPosition = C.TIME_UNSET;
+    private final HashMap<String, String> requestProperties = new HashMap<>();
 
     private static final CookieManager DEFAULT_COOKIE_MANAGER;
 
@@ -133,24 +136,18 @@ public class PlayerActivity extends AppCompatActivity {
 
         mediaStreamUrl = intent.getStringExtra("mediaStreamUrl");
         drmLicenceUrl = intent.getStringExtra("drmLicenceUrl");
-        int selectedUserAgent = intent.getIntExtra("selectedAgent", 0);
+        refererValue = intent.getStringExtra("refererValue");
+        userAgent = intent.getStringExtra("userAgent");
         int selectedDrmScheme = intent.getIntExtra("selectedDrmScheme", 0);
 
+        Log.d("madara", "onCreate: " + userAgent + "\n"+ refererValue);
 
-        if (drmLicenceUrl.equalsIgnoreCase("none")) {
+        if (drmLicenceUrl.equalsIgnoreCase("")) {
             drmLicenceUrl = getString(R.string.default_drm_licence_url);
         }
 
-        if (selectedUserAgent == 1) {
-            userAgent = getString(R.string.chrome_android_agent);
-        } else if (selectedUserAgent == 2) {
-            userAgent = getString(R.string.chrome_windows_agent);
-        } else if (selectedUserAgent == 3) {
-            userAgent = getString(R.string.firefox_android_agent);
-        } else if (selectedUserAgent == 4) {
-            userAgent = getString(R.string.firefox_windows_agent);
-        } else {
-            userAgent = getString(R.string.default_useragent);
+        if (!Objects.equals(refererValue, "")){
+            requestProperties.put("Referer", refererValue);
         }
 
         if (selectedDrmScheme == 0) {
@@ -293,12 +290,12 @@ public class PlayerActivity extends AppCompatActivity {
             }
 
             @Override
-            public boolean onFling(@NonNull MotionEvent motionEvent, @NonNull MotionEvent motionEvent1, float v, float v1) {
+            public boolean onFling(MotionEvent motionEvent, @NonNull MotionEvent motionEvent1, float v, float v1) {
                 return false;
             }
 
             @Override
-            public boolean onScroll(@NonNull MotionEvent motionEvent, @NonNull MotionEvent motionEvent1, float distanceX, float distanceY) {
+            public boolean onScroll(MotionEvent motionEvent, @NonNull MotionEvent motionEvent1, float distanceX, float distanceY) {
 
                 int deviceWidth = Resources.getSystem().getDisplayMetrics().widthPixels;
 
@@ -393,6 +390,8 @@ public class PlayerActivity extends AppCompatActivity {
                     URL url = new URL(mediaStreamUrl);
                     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                     conn.setRequestMethod("HEAD");  // Use HEAD request to check content type
+                    conn.setRequestProperty("User-Agent", userAgent);
+                    conn.setRequestProperty("Referer", refererValue);
 
                     // Enable following redirects
                     conn.setInstanceFollowRedirects(true);
@@ -487,7 +486,10 @@ public class PlayerActivity extends AppCompatActivity {
 
     private DefaultDrmSessionManager buildDrmSessionManager(UUID uuid, String userAgent, String drmLicenseUrl) {
 
-        HttpDataSource.Factory licenseDataSourceFactory = new DefaultHttpDataSource.Factory().setUserAgent(userAgent);
+        HttpDataSource.Factory licenseDataSourceFactory = new DefaultHttpDataSource.Factory()
+                .setAllowCrossProtocolRedirects(true)
+                .setUserAgent(userAgent)
+                .setDefaultRequestProperties(requestProperties);
 
         HttpMediaDrmCallback drmCallback = new HttpMediaDrmCallback(drmLicenseUrl, true, licenseDataSourceFactory);
 
@@ -502,6 +504,7 @@ public class PlayerActivity extends AppCompatActivity {
         DataSource.Factory defaultHttpDataSourceFactory = new DefaultHttpDataSource.Factory()
                 .setUserAgent(userAgent)
                 .setAllowCrossProtocolRedirects(true)
+                .setDefaultRequestProperties(requestProperties)
                 .setTransferListener(
                         new DefaultBandwidthMeter.Builder(PlayerActivity.this)
                                 .setResetOnNetworkTypeChange(false)
@@ -512,6 +515,7 @@ public class PlayerActivity extends AppCompatActivity {
 
         DataSource.Factory manifestDataSourceFactory = new DefaultHttpDataSource.Factory()
                 .setUserAgent(userAgent)
+                .setDefaultRequestProperties(requestProperties)
                 .setAllowCrossProtocolRedirects(true);
 
         return new DashMediaSource.Factory(dashChunkSourceFactory, manifestDataSourceFactory)
@@ -539,6 +543,7 @@ public class PlayerActivity extends AppCompatActivity {
 
         DataSource.Factory dataSourceFactory = new DefaultDataSource.Factory(this, new DefaultHttpDataSource.Factory()
                 .setUserAgent(userAgent)
+                .setDefaultRequestProperties(requestProperties)
                 .setAllowCrossProtocolRedirects(true));
 
         return new HlsMediaSource.Factory(dataSourceFactory)
@@ -671,6 +676,12 @@ public class PlayerActivity extends AppCompatActivity {
     }
     //______________________________________________________________________________________________
 
+
+    /**
+     * Star Sports 1 Hindi
+     * https://mhdtvsports.co.in/crichd/stream.php?id=starhindi&e=.m3u8
+     * Refferer: https://mhdtvsports.co.in/crichd/?watch=starhindi
+     * */
 
     @Override
     protected void onResume() {

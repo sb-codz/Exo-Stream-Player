@@ -18,6 +18,11 @@
         tools:ignore="HardcodedText">
         <menu>
             <item
+                android:id="@+id/rate_action"
+                android:icon="@drawable/star_24"
+                android:title="Give Rating" />
+
+            <item
                 android:id="@+id/share_action"
                 android:icon="@drawable/share_24"
                 android:title="Share" />
