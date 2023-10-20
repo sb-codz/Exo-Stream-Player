@@ -676,13 +676,6 @@ public class PlayerActivity extends AppCompatActivity {
     }
     //______________________________________________________________________________________________
 
-
-    /**
-     * Star Sports 1 Hindi
-     * https://mhdtvsports.co.in/crichd/stream.php?id=starhindi&e=.m3u8
-     * Refferer: https://mhdtvsports.co.in/crichd/?watch=starhindi
-     * */
-
     @Override
     protected void onResume() {
         super.onResume();
