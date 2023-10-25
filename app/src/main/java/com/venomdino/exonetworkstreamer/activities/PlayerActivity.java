@@ -81,6 +81,7 @@ import java.util.UUID;
 
 @UnstableApi
 public class PlayerActivity extends AppCompatActivity {
+
     private String mediaStreamUrl, drmLicenceUrl, refererValue, userAgent;
     private PlayerView playerView;
     private ProgressBar bufferProgressbar;
@@ -93,14 +94,14 @@ public class PlayerActivity extends AppCompatActivity {
     private ImageButton screenRotateBtn, qualitySelectionBtn, backButton, fitScreenBtn, backward10, forward10;
     private Button doubleTapSkipBackwardIcon, doubleTapSkipForwardIcon;
     private int touchPositionX;
-    GestureDetectorCompat gestureDetectorCompat;
+    private GestureDetectorCompat gestureDetectorCompat;
     private int brightness = 0;
     private int volume = 0;
     private AudioManager audioManager;
     private final int SHOW_MAX_BRIGHTNESS = 100;
     private final int SHOW_MAX_VOLUME = 50;
-    boolean shouldShowController = true;
-    int selectedQualityIndex = 0;
+    private boolean shouldShowController = true;
+    private int selectedQualityIndex = 0;
     private UUID drmScheme;
     private boolean playWhenReady = true;
     private boolean hasRetried = false;
