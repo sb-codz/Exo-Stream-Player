@@ -19,7 +19,7 @@
         <activity
             android:name=".activities.PlayerActivity"
             android:exported="false"
-            android:configChanges="orientation|uiMode|screenSize|keyboardHidden"
+            android:configChanges="orientation|uiMode|screenSize|keyboardHidden|smallestScreenSize"
             android:hardwareAccelerated="true"/>
         <activity
             android:name=".activities.MainActivity"

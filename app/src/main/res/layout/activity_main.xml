@@ -19,109 +19,19 @@
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true" />
 
-        <LinearLayout
-            android:id="@+id/formContainer"
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/viewPager2"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_below="@+id/toolbar"
-            android:orientation="vertical"
-            android:padding="10dp">
+            android:layout_above="@+id/bottomNavView"/>
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/media_stream_url_til"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"
-                android:hint="@string/video_link_text"
-                app:startIconDrawable="@drawable/insert_link_24">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/media_stream_url_et"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:ellipsize="end"
-                    android:maxLines="1"
-                    android:singleLine="true" />
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/drm_licence_url_til"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"
-                android:hint="@string/drm_licence_url"
-                app:startIconDrawable="@drawable/insert_link_24">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/drm_licence_url_et"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:ellipsize="end"
-                    android:lines="1"
-                    android:singleLine="true"
-                    android:maxLines="1" />
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/referer_til"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"
-                android:hint="@string/referer_value"
-                app:startIconDrawable="@drawable/create_24">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/referer_et"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:ellipsize="end"
-                    android:lines="1"
-                    android:singleLine="true"
-                    android:maxLines="1" />
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <Spinner
-                android:id="@+id/userAgentSpinner"
-                android:layout_width="match_parent"
-                android:layout_height="55dp"
-                android:layout_marginTop="5dp"
-                android:background="@drawable/spinner_border"
-                android:paddingHorizontal="10dp"
-                android:spinnerMode="dropdown"
-                android:textColor="?attr/text_color"
-                tools:ignore="HardcodedText" />
-
-            <Spinner
-                android:id="@+id/drmSchemeSelector"
-                android:layout_width="match_parent"
-                android:layout_height="55dp"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/spinner_border"
-                android:paddingHorizontal="10dp"
-                android:spinnerMode="dropdown"
-                android:textColor="?attr/text_color"
-                tools:ignore="HardcodedText" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/play_btn"
-                android:layout_width="match_parent"
-                android:layout_height="55dp"
-                android:layout_marginTop="20dp"
-                android:backgroundTint="@color/day_blue"
-                android:text="Play"
-                android:textSize="18sp"
-                app:icon="@drawable/play_arrow_24"
-                app:iconTint="@color/white"
-                app:iconGravity="textStart"
-                app:iconSize="30dp"
-                android:textColor="@color/white"
-                tools:ignore="HardcodedText" />
-        </LinearLayout>
-
-
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/bottomNavView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:menu="@menu/nav_bottom"
+            android:layout_alignParentBottom="true"/>
     </RelativeLayout>
 
     <com.google.android.material.navigation.NavigationView
